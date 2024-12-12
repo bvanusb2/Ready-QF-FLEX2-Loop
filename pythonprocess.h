@@ -24,6 +24,7 @@ private:
     // The Python Selenium QF script will print this string at
     // startup.
     inline static const QString SeleniumQFInterfaceReadyString = "SeleniumQFInterfaceReady";
+    inline static const QString SeleniumQFInterfaceQuitString = "quit";
 };
 
 #endif // PYTHONPROCESS_H

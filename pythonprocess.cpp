@@ -1,8 +1,6 @@
 #include "pythonprocess.h"
 #include "QProcess"
 #include "qdebug.h"
-#include "qthread.h"
-//#include "qthread.h"
 
 
 PythonProcess::PythonProcess()
@@ -11,13 +9,16 @@ PythonProcess::PythonProcess()
 }
 
 PythonProcess::~PythonProcess() {
-    qDebug() << "killing mProcess.terminate";
-    mProcess.terminate();
-    // will we need to use .kill() to insure proc is dead?
+    terminate();
 }
 
 void PythonProcess::terminate() {
-    mProcess.terminate();
+    QString msgOut;
+    sendToProcess(SeleniumQFInterfaceQuitString, msgOut);
+
+    if (mProcess.processId() != 0) {
+        mProcess.terminate();
+    }
 }
 
 //
@@ -31,9 +32,6 @@ void PythonProcess::terminate() {
 void PythonProcess::request(const QStringList& argsIn, std::string& msgOutStr, QString& stderr) {
 
     QString p_stdout;
-    //QString p_stderr;
-
-    //msgOut.mCommand = msgIn.mCommand;
 
     QProcess p;
     p.start("python3", argsIn);
@@ -64,14 +62,9 @@ bool PythonProcess::spawnProcess(QStringList pyScriptNameAndParams) {
     // for the webpage to spin up!!!
     mProcess.waitForReadyRead(4000);  // mS or -1 to wait indf.
     QString msgOutStr = mProcess.readAll();
-    qDebug() << "The startup string from python" << msgOutStr;
 
     if (msgOutStr.contains(SeleniumQFInterfaceReadyString)) {
         started = true;
-        qDebug() << "msg out string contains qf ready string";
-    }
-    else {
-        qDebug() << "Python3 neve spun up!";
     }
 
     return started;
@@ -81,11 +74,11 @@ void PythonProcess::sendToProcess(QString msgInStr, QString& msgOutStr) {
 
 
     // first call starting, 2nd call running
+    QProcess::ProcessState state = mProcess.state();
     if(mProcess.state() != QProcess::NotRunning) {
 
+        // The msg to the python process needs a "\n" to act as a cr/lf (enter key press)
         msgInStr += "\n";
-
-        //qDebug() << "process id: " << mProcess.processId(); 0 if not running
 
         mProcess.write(msgInStr.toUtf8());
 
@@ -93,7 +86,6 @@ void PythonProcess::sendToProcess(QString msgInStr, QString& msgOutStr) {
         mProcess.waitForReadyRead(500);  // mS or -1 to wait indf.
         msgOutStr = mProcess.readAll();
 
-        qDebug() << "in pythonprocess::sendToProcess, output: " << msgOutStr;
         QString stderr = mProcess.readAllStandardError(); // todo - what about this?
     }
     else {

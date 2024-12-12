@@ -12,6 +12,7 @@ public:
         ConnectToSelenium,
         ConnectToSeleniumFailed,
         GetECCirc_PumpCapRepoDisposablePumpStatus_accumVolMl,
+        Quit
     };
 
     Command mCommand;
@@ -44,7 +45,7 @@ public:
     // bvs I think this has to be moved into the process thread
     // so we can spawn the python script from there as well
     //PythonProcess mPythonSeleniumProcess;
-    std::unique_ptr<PythonProcess> mPythonSeleniumProcessPtr;
+    std::unique_ptr<PythonProcess> mPythonSeleniumProcessPtr = nullptr;
 
 };
 

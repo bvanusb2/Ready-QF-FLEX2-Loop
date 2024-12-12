@@ -40,9 +40,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    mQFThreadPtr->terminate();
+    mOpcThreadPtr->terminate();
+
     delete ui;
     delete mQueryResponseTimer;
-
 
 }
 

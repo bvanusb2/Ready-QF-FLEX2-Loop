@@ -9,11 +9,13 @@ QFprocessor::QFprocessor(QThread *parent) : ThreadContainer{parent} {
 
 QFprocessor::~QFprocessor() {
     terminate();
-    mPythonSeleniumProcessPtr = nullptr;
 }
 
 void QFprocessor::terminate() {
-    mPythonSeleniumProcessPtr->terminate();
+    if (mPythonSeleniumProcessPtr != nullptr) {
+        mPythonSeleniumProcessPtr->terminate();
+        mPythonSeleniumProcessPtr = nullptr;
+    }
 }
 
 void QFprocessor::process(std::vector<QFmessage> &svinput, std::vector<QFmessage> &svoutput) {
