@@ -40,8 +40,13 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    mQFThreadPtr->terminate();
-    mOpcThreadPtr->terminate();
+    // Send a message to the QF processor thread to instruct the python script
+    // to close the DEO window and terminate
+    // todo - still getting a QMutes: destroying locked mutex msg
+    mQFThreadPtr->sendQuitMsgToPySel();
+    QThread::sleep(2);
+
+    mOpcThreadPtr->terminateProc();
 
     delete ui;
     delete mQueryResponseTimer;
@@ -149,7 +154,7 @@ void MainWindow::on_pushButtonConnToSelQf_clicked()
     QFmessage msg;
     std::vector<QFmessage> msgs;
     msg.mCommand = QFmessage::Command::ConnectToSelenium;
-    msg.mCommandStringList.push_back("/home/braddonvanslyke/Terumo/Projects/QuantumFlex/Selenium/QFseleniumInterface.py");
+    msg.mCommandStringList.push_back("/home/braddonvanslyke/Terumo/QtProject/QF_FLEX2_Loop/QFseleniumInterface.py");
 
     QString ipAddr = ui->lineEditQfIpAddr->text();
     msg.mCommandStringList.push_back(ipAddr);

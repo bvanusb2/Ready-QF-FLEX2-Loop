@@ -8,12 +8,27 @@ QFprocessor::QFprocessor(QThread *parent) : ThreadContainer{parent} {
 }
 
 QFprocessor::~QFprocessor() {
-    terminate();
+    stopThread();
 }
 
-void QFprocessor::terminate() {
+//
+// Function name: sendQuitMsgToPySel
+//
+// Purpose: Called by mainWindow or other thread, sends a message request to the
+//          QFprocessor to tell the python script to close the DEO window and terminate
+//          itself
+//
+void QFprocessor::sendQuitMsgToPySel() {
+    QFmessage msg;
+    std::vector<QFmessage> msgs;
+    msg.mCommand = QFmessage::Command::Quit;
+    msgs.push_back(msg);
+    pushSampleData(msgs);
+}
+
+void QFprocessor::terminateProc() {
     if (mPythonSeleniumProcessPtr != nullptr) {
-        mPythonSeleniumProcessPtr->terminate();
+     //   mPythonSeleniumProcessPtr->terminate();
         mPythonSeleniumProcessPtr = nullptr;
     }
 }
@@ -32,8 +47,6 @@ void QFprocessor::process(std::vector<QFmessage> &svinput, std::vector<QFmessage
 
         switch(msg.mCommand) {
         case QFmessage::Command::ConnectToSelenium:
-
-            // You'll need the script location/name and IP addr of QF DEO
             qDebug() << "QFprocess spawn: " << msg.mCommandStringList[0] << ", addr: " << msg.mCommandStringList[1];
             if (mPythonSeleniumProcessPtr->spawnProcess(msg.mCommandStringList)) {
                 msgResult.mResponseStr = "Python Selenium processor spawned";
@@ -45,11 +58,14 @@ void QFprocessor::process(std::vector<QFmessage> &svinput, std::vector<QFmessage
             break;
 
         case QFmessage::Command::GetECCirc_PumpCapRepoDisposablePumpStatus_accumVolMl:
-            // this is a blocking call - ok because this is a separate thread
-            qDebug() << "QFprocess rcve msg for pump mL";
             mPythonSeleniumProcessPtr->sendToProcess("ECCirc_PumpCapRepoDisposablePumpStatus._accumVolMl.Value", result);
             msgResult.mResponseStr = result.toStdString();
-            qDebug() << "qfprocessor rcvd result str: " << result;
+            svoutput.push_back(msgResult);
+            break;
+
+        case QFmessage::Command::Quit:
+            mPythonSeleniumProcessPtr->sendToProcess(SeleniumQFInterfaceQuitString, result);
+            msgResult.mResponseStr = result.toStdString();
             svoutput.push_back(msgResult);
             break;
 

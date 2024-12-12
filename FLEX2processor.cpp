@@ -8,6 +8,15 @@ FLEX2processor::FLEX2processor(QThread *parent) : ThreadContainer{parent} {
 
 }
 
+FLEX2processor::~FLEX2processor() {
+    stopThread();
+}
+
+void FLEX2processor::terminateProc() {
+    // If there is any kind of Python running apps, they are terminated here
+    // see the QFprocessor
+}
+
 
 //
 // Function name: process
@@ -51,7 +60,7 @@ void FLEX2processor::procPythonInOut(QStringList& arg, FLEX2message& msgIn, FLEX
 
     std::string msgOutStr;
 
-    mPythonProcess.request(arg, msgOutStr, p_stderr);
+    mPythonOneShot.request(arg, msgOutStr, p_stderr);
 
     msgOut = msgIn;
     msgOut.mResponseStr = msgOutStr;

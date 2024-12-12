@@ -30,6 +30,9 @@ class FLEX2processor : public ThreadContainer<FLEX2message>
 {
 public:
     explicit FLEX2processor(QThread *parent = nullptr);
+    ~FLEX2processor();
+
+    void terminateProc();
 
 private:
 
@@ -37,7 +40,7 @@ private:
     //void pythonRequest(const QStringList& argsIn, std::string &msgOutStr, QString& stderr);
     void procPythonInOut(QStringList& arg, FLEX2message &msgIn, FLEX2message &msgOut, QString p_stderr);
 
-    PythonProcess mPythonProcess;
+    PythonOneShot mPythonOneShot;
 
 };
 

@@ -59,3 +59,6 @@ while inputStr != "quit" :
         mlDisplay = driver.find_element(by=By.ID, value = inputStr)
 
         print(mlDisplay.text);
+        
+driver.close()  # supposedly quit works too?
+#print("done")

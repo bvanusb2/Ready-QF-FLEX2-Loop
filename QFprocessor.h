@@ -38,7 +38,9 @@ public:
     explicit QFprocessor(QThread *parent = nullptr);
     ~QFprocessor();
 
-    void terminate();
+    void terminateProc();
+
+    void sendQuitMsgToPySel();
 
     void process(std::vector<QFmessage>& svinput, std::vector<QFmessage>& svoutput);
 
@@ -46,6 +48,10 @@ public:
     // so we can spawn the python script from there as well
     //PythonProcess mPythonSeleniumProcess;
     std::unique_ptr<PythonProcess> mPythonSeleniumProcessPtr = nullptr;
+
+private:
+
+    inline static const QString SeleniumQFInterfaceQuitString = "quit";
 
 };
 
