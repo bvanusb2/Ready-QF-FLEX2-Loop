@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="pushButtonGetLacticAcidFlex">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>120</y>
+      <x>70</x>
+      <y>240</y>
       <width>131</width>
       <height>25</height>
      </rect>
@@ -30,8 +30,8 @@
    <widget class="QPushButton" name="pushButtonGetPhFlex">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>170</y>
+      <x>70</x>
+      <y>290</y>
       <width>131</width>
       <height>25</height>
      </rect>
@@ -40,24 +40,11 @@
      <string>Query pH</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButtonCheckFlex2Conn">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>290</y>
-      <width>131</width>
-      <height>25</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Check FLEX2 Conn</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>200</y>
+      <x>250</x>
+      <y>320</y>
       <width>54</width>
       <height>17</height>
      </rect>
@@ -69,8 +56,8 @@
    <widget class="QLineEdit" name="lineEditPh">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>170</y>
+      <x>230</x>
+      <y>290</y>
       <width>113</width>
       <height>25</height>
      </rect>
@@ -82,8 +69,8 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>150</y>
+      <x>230</x>
+      <y>270</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -95,8 +82,8 @@
    <widget class="QLineEdit" name="lineEditLacticAcidConc">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>120</y>
+      <x>230</x>
+      <y>240</y>
       <width>113</width>
       <height>25</height>
      </rect>
@@ -108,9 +95,9 @@
    <widget class="QLineEdit" name="lineEditFlex2ConnStatus">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>290</y>
-      <width>113</width>
+      <x>220</x>
+      <y>120</y>
+      <width>131</width>
       <height>25</height>
      </rect>
     </property>
@@ -121,8 +108,8 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>320</y>
+      <x>220</x>
+      <y>150</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -134,8 +121,8 @@
    <widget class="QPushButton" name="pushButtonCheckQfConn">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>230</y>
+      <x>220</x>
+      <y>80</y>
       <width>131</width>
       <height>25</height>
      </rect>
@@ -148,7 +135,7 @@
     <property name="geometry">
      <rect>
       <x>600</x>
-      <y>110</y>
+      <y>150</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -161,7 +148,7 @@
     <property name="geometry">
      <rect>
       <x>600</x>
-      <y>80</y>
+      <y>120</y>
       <width>131</width>
       <height>25</height>
      </rect>
@@ -174,7 +161,7 @@
     <property name="geometry">
      <rect>
       <x>470</x>
-      <y>40</y>
+      <y>80</y>
       <width>113</width>
       <height>25</height>
      </rect>
@@ -187,7 +174,7 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>80</y>
+      <y>120</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -199,8 +186,8 @@
    <widget class="QLineEdit" name="lineEditFlex2IpAddr">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>40</y>
+      <x>70</x>
+      <y>80</y>
       <width>113</width>
       <height>25</height>
      </rect>
@@ -212,8 +199,8 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>80</y>
+      <x>80</x>
+      <y>120</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -226,7 +213,7 @@
     <property name="geometry">
      <rect>
       <x>470</x>
-      <y>200</y>
+      <y>240</y>
       <width>131</width>
       <height>25</height>
      </rect>
@@ -239,7 +226,7 @@
     <property name="geometry">
      <rect>
       <x>600</x>
-      <y>40</y>
+      <y>80</y>
       <width>131</width>
       <height>25</height>
      </rect>
@@ -252,13 +239,39 @@
     <property name="geometry">
      <rect>
       <x>640</x>
-      <y>200</y>
+      <y>240</y>
       <width>113</width>
       <height>25</height>
      </rect>
     </property>
     <property name="text">
      <string>0.0</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditAddrPythonScriptsFolder">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>20</y>
+      <width>401</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>/home/braddonvanslyke/Terumo/QtProject/QF_FLEX2_Loop/</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>50</y>
+      <width>211</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Location of Python Scripts</string>
     </property>
    </widget>
   </widget>

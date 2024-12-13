@@ -61,4 +61,4 @@ while inputStr != "quit" :
         print(mlDisplay.text);
         
 driver.close()  # supposedly quit works too?
-#print("done")
+print("done")

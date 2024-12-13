@@ -25,12 +25,12 @@ MainWindow::MainWindow(QWidget *parent)
     // synchonous Python scripts system calls.  It pushes the responses into a queue
     // which can later be pulled from.
     if (mOpcThreadPtr == nullptr) {
-        mOpcThreadPtr = std::make_unique<FLEX2processor>();
+        mOpcThreadPtr = std::make_unique<FLEX2processor>(ui->lineEditAddrPythonScriptsFolder->text());
         mOpcThreadPtr->startThread();
     }
 
     if (mQFThreadPtr == nullptr) {
-        mQFThreadPtr = std::make_unique<QFprocessor>();
+        mQFThreadPtr = std::make_unique<QFprocessor>(ui->lineEditAddrPythonScriptsFolder->text());
         mQFThreadPtr->startThread();
     }
 
@@ -44,6 +44,8 @@ MainWindow::~MainWindow()
     // to close the DEO window and terminate
     // todo - still getting a QMutes: destroying locked mutex msg
     mQFThreadPtr->sendQuitMsgToPySel();
+
+    // Allow enough time for script to close DEO and clean up
     QThread::sleep(2);
 
     mOpcThreadPtr->terminateProc();
@@ -153,16 +155,16 @@ void MainWindow::on_pushButtonConnToSelQf_clicked()
 {
     QFmessage msg;
     std::vector<QFmessage> msgs;
+
     msg.mCommand = QFmessage::Command::ConnectToSelenium;
-    msg.mCommandStringList.push_back("/home/braddonvanslyke/Terumo/QtProject/QF_FLEX2_Loop/QFseleniumInterface.py");
+
+    msg.mCommandStringList.push_back("QFseleniumInterface.py");
 
     QString ipAddr = ui->lineEditQfIpAddr->text();
     msg.mCommandStringList.push_back(ipAddr);
     msgs.push_back(msg);
 
-
     mQFThreadPtr->pushSampleData(msgs);
-    // TODO - indicator that connection is valid or not.
 }
 
 

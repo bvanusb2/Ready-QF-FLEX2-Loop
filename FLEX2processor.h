@@ -29,7 +29,7 @@ public:
 class FLEX2processor : public ThreadContainer<FLEX2message>
 {
 public:
-    explicit FLEX2processor(QThread *parent = nullptr);
+    explicit FLEX2processor(QString folder = "/", QThread *parent = nullptr);
     ~FLEX2processor();
 
     void terminateProc();
@@ -42,6 +42,7 @@ private:
 
     PythonOneShot mPythonOneShot;
 
+    QString mPythonScriptFolderName;
 };
 
 #endif // FLEX2PROCESSOR_H

@@ -4,13 +4,14 @@
 
 #include "FLEX2processor.h"
 
-FLEX2processor::FLEX2processor(QThread *parent) : ThreadContainer{parent} {
-
+FLEX2processor::FLEX2processor(QString folder, QThread *parent) :
+    ThreadContainer{parent}
+  , mPythonScriptFolderName(folder) {
 }
 
 FLEX2processor::~FLEX2processor() {
-    stopThread();
 }
+
 
 void FLEX2processor::terminateProc() {
     // If there is any kind of Python running apps, they are terminated here
@@ -33,22 +34,28 @@ void FLEX2processor::process(std::vector<FLEX2message> &svinput, std::vector<FLE
 
         std::string msgOutStr;
 
+        // todo - data/string formatting should be done here, so consumers don't have to
+        // know about any formats
+
         if (msgIn.mCommand == FLEX2message::Command::GetTime) {
 
             // example arg list with dummy args.  They are not used.
-            QStringList arg {"/home/braddonvanslyke/Terumo/QtProject/SimpleGuiTest/getTime.py", "3.0", "wgs"};
+            QStringList arg;
+            arg.push_back(mPythonScriptFolderName + "getTime.py");
+            arg.push_back( "3.0" );
+            arg.push_back( "wgs");
             procPythonInOut(arg, msgIn, msgOut, p_stderr);
             svoutput.push_back(msgOut);
         }
         else if (msgIn.mCommand == FLEX2message::Command::GetLacticAcidConc) {
-
-            QStringList arg {"/home/braddonvanslyke/Terumo/QtProject/SimpleGuiTest/getLacticAcid.py"};
+            QStringList arg;
+            arg.push_back(mPythonScriptFolderName + "getLacticAcid.py");
             procPythonInOut(arg, msgIn, msgOut, p_stderr);
             svoutput.push_back(msgOut);
         }
         else if (msgIn.mCommand == FLEX2message::Command::GetpH) {
-
-            QStringList arg {"/home/braddonvanslyke/Terumo/QtProject/SimpleGuiTest/getpH.py"};
+            QStringList arg;
+            arg.push_back(mPythonScriptFolderName + "getpH.py");
             procPythonInOut(arg, msgIn, msgOut, p_stderr);
             svoutput.push_back(msgOut);
         }

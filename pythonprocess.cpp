@@ -1,3 +1,8 @@
+//
+// Filename: pythonprocess.cpp
+//
+// Purpose:
+
 #include "pythonprocess.h"
 #include "QProcess"
 #include "qdebug.h"
@@ -12,18 +17,17 @@ PythonProcess::~PythonProcess() {
     //terminate();
 }
 
-void PythonProcess::terminate() {
+//void PythonProcess::terminate() {
 
-    // todo - as shutting down this process, the system is issuing these warnings...
-    // QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
+//    // todo - as shutting down this process, the system is issuing these warnings...
+//    // QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
+//    terminateProcessRequest();
 
-    QString msgOut;
-    //sendToProcess(SeleniumQFInterfaceQuitString, msgOut);
-    terminateProcessRequest();
-    if (mProcess.processId() != 0) {
-        mProcess.terminate();
-    }
-}
+//    // do we need to wait for sleep to finish?  Should we get rid of sleep in py script?
+//    if (mProcess.processId() != 0) {
+//        mProcess.terminate();
+//    }
+//}
 
 
 // QStringList must include pythonScriptName.py, and any parameters expected
@@ -48,19 +52,6 @@ bool PythonProcess::spawnProcess(QStringList pyScriptNameAndParams) {
     }
 
     return started;
-}
-
-void PythonProcess::terminateProcessRequest() {
-    QProcess::ProcessState state = mProcess.state();
-    if(mProcess.state() != QProcess::NotRunning) {
-
-        // The msg to the python process needs a "\n" to act as a cr/lf (enter key press)
-        QString msgInStr = "quit\n"; //SeleniumQFInterfaceQuitString + "\n";
-
-        // todo - problem.  If you write "quit" to the python process, it does quit,
-        // but then you're stuck with a dead process...
-        mProcess.write(msgInStr.toUtf8());
-    }
 }
 
 void PythonProcess::sendToProcess(QString msgInStr, QString& msgOutStr) {

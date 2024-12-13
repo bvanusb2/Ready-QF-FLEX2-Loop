@@ -10,8 +10,8 @@ public:
     PythonProcess();
     ~PythonProcess();
 
-    void terminate();
-    void terminateProcessRequest();
+//    void terminate();
+//    void terminateProcessRequest();
     //void request(const QStringList& argsIn, std::string& msgOutStr, QString& stderr);
 
     QProcess mProcess;

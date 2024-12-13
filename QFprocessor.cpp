@@ -1,14 +1,19 @@
+//
+// Filename: QFprocessor.cpp
+//
+// Purpose:
+
 #include "QFprocessor.h"
 
 // for debug
 #include "QDebug"
 
-QFprocessor::QFprocessor(QThread *parent) : ThreadContainer{parent} {
-
+QFprocessor::QFprocessor(QString folder, QThread *parent) :
+    ThreadContainer{parent}
+    , mPythonScriptFolderName(folder) {
 }
 
 QFprocessor::~QFprocessor() {
-    stopThread();
 }
 
 //
@@ -28,7 +33,6 @@ void QFprocessor::sendQuitMsgToPySel() {
 
 void QFprocessor::terminateProc() {
     if (mPythonSeleniumProcessPtr != nullptr) {
-     //   mPythonSeleniumProcessPtr->terminate();
         mPythonSeleniumProcessPtr = nullptr;
     }
 }
@@ -47,7 +51,11 @@ void QFprocessor::process(std::vector<QFmessage> &svinput, std::vector<QFmessage
 
         switch(msg.mCommand) {
         case QFmessage::Command::ConnectToSelenium:
+            // Insert the folder location before script filename
+            msg.mCommandStringList[0].insert(0, mPythonScriptFolderName);
+
             qDebug() << "QFprocess spawn: " << msg.mCommandStringList[0] << ", addr: " << msg.mCommandStringList[1];
+
             if (mPythonSeleniumProcessPtr->spawnProcess(msg.mCommandStringList)) {
                 msgResult.mResponseStr = "Python Selenium processor spawned";
             } else {

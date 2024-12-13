@@ -35,7 +35,7 @@ public:
 class QFprocessor : public  ThreadContainer<QFmessage>
 {
 public:
-    explicit QFprocessor(QThread *parent = nullptr);
+    explicit QFprocessor(QString folder = "/", QThread *parent = nullptr);
     ~QFprocessor();
 
     void terminateProc();
@@ -52,6 +52,8 @@ public:
 private:
 
     inline static const QString SeleniumQFInterfaceQuitString = "quit";
+
+    QString mPythonScriptFolderName;
 
 };
 
