@@ -56,7 +56,6 @@ bool PythonProcess::spawnProcess(QStringList pyScriptNameAndParams) {
 
 void PythonProcess::sendToProcess(QString msgInStr, QString& msgOutStr) {
 
-
     // first call starting, 2nd call running
     QProcess::ProcessState state = mProcess.state();
     if(mProcess.state() != QProcess::NotRunning) {
@@ -64,12 +63,11 @@ void PythonProcess::sendToProcess(QString msgInStr, QString& msgOutStr) {
         // The msg to the python process needs a "\n" to act as a cr/lf (enter key press)
         msgInStr += "\n";
 
-        // todo - problem.  If you write "quit" to the python process, it does quit,
-        // but then you're stuck with a dead process...
         mProcess.write(msgInStr.toUtf8());
 
-        // todo - magic wait time, 500mS seems to work
-        mProcess.waitForReadyRead(500);  // mS or -1 to wait indf.
+        // todo - !!! Critical! Must be longer than QFseleniumInterface.py timeout, or
+        // it returns "" while py script is still waiting for response!!!
+        mProcess.waitForReadyRead(5000);  // mS or -1 to wait indf.
         msgOutStr = mProcess.readAll();
 
         QString stderr = mProcess.readAllStandardError(); // todo - what about this?

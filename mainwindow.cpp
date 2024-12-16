@@ -18,7 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // This timer periodically checks for queued OPC responses
     mQueryResponseTimer = new QTimer(this);
-    connect(mQueryResponseTimer, &QTimer::timeout, this, &MainWindow::mQueryResponse);
+    connect(mQueryResponseTimer, &QTimer::timeout, this, &MainWindow::mQueryResponseTimerSlot);
+
     mQueryResponseTimer->start(mQueryResponseTimerInterval);
 
     // The OPC thread takes requests from the GUI (or a timer) and invokes
@@ -33,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
         mQFThreadPtr = std::make_unique<QFprocessor>(ui->lineEditAddrPythonScriptsFolder->text());
         mQFThreadPtr->startThread();
     }
-
-
 
 }
 
@@ -61,8 +60,23 @@ MainWindow::~MainWindow()
 // Purpose: Timer driven, polls the OPC thread for any new messages, and if so,
 //          processes them.
 //
-void MainWindow::mQueryResponse() {
+void MainWindow::mQueryResponseTimerSlot() {
 
+    mProcessPeriodicOPC();
+
+    mProcessPeriodicQF();
+
+}
+
+
+// todo - consider renaming mProcessPeriodicFlex2
+//
+// Function name: mProcessPeriodicOpc
+//
+// Purpose: Timer driven, polls the OPC thread for any new messages, and if so,
+//          processes them.
+//
+void MainWindow::mProcessPeriodicOPC() {
     if (mOpcThreadPtr->pullDataReady()) {
 
         std::vector<FLEX2message> msgs;
@@ -99,10 +113,20 @@ void MainWindow::mQueryResponse() {
 
     }
 
+}
+
+//
+// Function name: mProcessPeriodicQF
+//
+// Purpose: Timer driven, polls the OPC thread for any new messages, and if so,
+//          processes them.
+//
+void MainWindow::mProcessPeriodicQF() {
     // This timer driven fcn looks for msgs from QF processor thread
-    if (mQFThreadPtr->pullDataReady()) {
+    while (mQFThreadPtr->pullDataReady()) {  // this WAS "if"
         std::vector<QFmessage> msgs;
 
+        // Todo - what is there are more than one msg vectors queued?
         mQFThreadPtr->pullProcessedData(msgs);
 
         qDebug() << "mQFThreadPtr.pullProcessedData";
@@ -113,21 +137,58 @@ void MainWindow::mQueryResponse() {
                 ui->lineEditFlow->setText(QString::fromStdString(resp));
             }
             else if (s.mCommand == QFmessage::Command::ConnectToSeleniumFailed) {
-                ui->lineEditQfConnStatus->setText("Failed Conn to Sel-QF");
-                qDebug() << "Main thread reports connect to selenium failed!!!";
+                disconnectedFromQF();
             }
             else if (s.mCommand == QFmessage::Command::ConnectToSelenium) {
-                ui->lineEditQfConnStatus->setText("Conn to Sel-QF");
+                connectedToQF();
+            }
+            else if (s.mCommand == QFmessage::Command::GetSystemTime) {
+                std::string resp = s.mResponseStr;
+
+                if (QString::fromStdString(resp) == QFprocessor::SeleniumQFCantFindElementString) {
+                    disconnectedFromQF();
+                    resp = "";
+                }
+
+                ui->lineEditQfSystemTime->setText(QString::fromStdString(resp));
+            }
+            else if (s.mCommand == QFmessage::Command::Quit) {
+                // A msg sent from here, echoed back
+            }
+            else {
+                qDebug() << "UNKNOWN command response!!!";
             }
         }
+    }
 
+    // periodically query the QF time.  Inform user if no response
+    if (mConnectedQF) {
+        QFmessage msg;
+        std::vector<QFmessage> msgs;
+        msg.mCommand = QFmessage::Command::GetSystemTime;
+        msgs.push_back(msg);
+        mQFThreadPtr->pushSampleData(msgs);
     }
 
 }
 
+void MainWindow::connectedToQF() {
+    ui->lineEditQfConnStatus->setText("Connected to QF");
+    mConnectedQF = true;
 
+    QPalette palette;
+    palette.setColor(QPalette::Base, Qt::green);
+    ui->lineEditQfConnStatus->setPalette(palette);
+}
 
+void MainWindow::disconnectedFromQF() {
+    ui->lineEditQfConnStatus->setText("Disconnected from QF");
+    mConnectedQF = false;
 
+    QPalette palette;
+    palette.setColor(QPalette::Base, Qt::yellow);
+    ui->lineEditQfConnStatus->setPalette(palette);
+}
 
 void MainWindow::on_pushButtonGetLacticAcidFlex_clicked()
 {
@@ -156,8 +217,17 @@ void MainWindow::on_pushButtonConnToSelQf_clicked()
     QFmessage msg;
     std::vector<QFmessage> msgs;
 
+    // If the python interface was running when it lost its connection
+    // make sure the process is stopped before restarting it and the web
+    // page
+    msg.mCommand = QFmessage::Command::Quit;
+    msgs.push_back(msg);
+
+
     msg.mCommand = QFmessage::Command::ConnectToSelenium;
 
+    // todo - move name to QFprocessor class as static const defn.
+    // should it be entirely contained in class?
     msg.mCommandStringList.push_back("QFseleniumInterface.py");
 
     QString ipAddr = ui->lineEditQfIpAddr->text();

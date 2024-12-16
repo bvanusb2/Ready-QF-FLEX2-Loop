@@ -11,6 +11,7 @@ public:
         None,
         ConnectToSelenium,
         ConnectToSeleniumFailed,
+        GetSystemTime,
         GetECCirc_PumpCapRepoDisposablePumpStatus_accumVolMl,
         Quit
     };
@@ -18,6 +19,8 @@ public:
     Command mCommand;
 
     QStringList mCommandStringList;
+
+
 
     // todo - was considering std::any but I don't know if I want
     // to get that crazy.  Plus I'm not sure if I like std::any.  I hate
@@ -48,6 +51,9 @@ public:
     // so we can spawn the python script from there as well
     //PythonProcess mPythonSeleniumProcess;
     std::unique_ptr<PythonProcess> mPythonSeleniumProcessPtr = nullptr;
+
+    inline static const QString SeleniumQFCantFindElementString = PythonProcess::SeleniumQFCantFindElementString;
+
 
 private:
 

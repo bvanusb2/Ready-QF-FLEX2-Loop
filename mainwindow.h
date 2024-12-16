@@ -7,6 +7,9 @@
 #include "FLEX2processor.h"
 #include "QFprocessor.h"
 
+// for "can't find element" string
+#include "pythonprocess.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -21,7 +24,9 @@ public:
 
 private slots:
 
-    void mQueryResponse();
+    void mQueryResponseTimerSlot();
+    void mProcessPeriodicQF();
+    void mProcessPeriodicOPC();
     void on_pushButtonGetLacticAcidFlex_clicked();
 
     void on_pushButtonGetPhFlex_clicked();
@@ -36,10 +41,15 @@ private:
     std::unique_ptr<FLEX2processor> mOpcThreadPtr = nullptr;
     std::unique_ptr<QFprocessor> mQFThreadPtr = nullptr;
 
+    void connectedToQF();
+    void disconnectedFromQF();
+
     // For now, just using a simple timer to check for responses.
     // Might add another timer to periodically query FLEX2 and Quautum devices
     QTimer * mQueryResponseTimer;
-    int mQueryResponseTimerInterval = 200;
+    int mQueryResponseTimerInterval = 1000; // mS
+    bool mConnectedQF = false;
+    std::string mPrevQFsystemTime;
 
 };
 #endif // MAINWINDOW_H

@@ -1,8 +1,9 @@
 //
 // Filename: QFprocessor.cpp
 //
-// Purpose:
-
+// Purpose: Provides thread and interfaces to communicating with QF through DEO and
+//          Selenium
+//
 #include "QFprocessor.h"
 
 // for debug
@@ -10,7 +11,7 @@
 
 QFprocessor::QFprocessor(QString folder, QThread *parent) :
     ThreadContainer{parent}
-    , mPythonScriptFolderName(folder) {
+    , mPythonScriptFolderName{folder} {
 }
 
 QFprocessor::~QFprocessor() {
@@ -65,9 +66,21 @@ void QFprocessor::process(std::vector<QFmessage> &svinput, std::vector<QFmessage
             svoutput.push_back(msgResult);
             break;
 
+        case QFmessage::Command::GetSystemTime:
+            mPythonSeleniumProcessPtr->sendToProcess("systemTime", result);
+            msgResult.mResponseStr = result.toStdString();
+            qDebug() << "Result from cmd systemTime: " << result;
+            svoutput.push_back(msgResult);
+            break;
+
+
+        // todo - warning - this field went away in DEO, and the py script barfed when it
+        // coudln't find it!  Furthermore, this app barfed when it couldn't talk to the py
+        // script!
         case QFmessage::Command::GetECCirc_PumpCapRepoDisposablePumpStatus_accumVolMl:
             mPythonSeleniumProcessPtr->sendToProcess("ECCirc_PumpCapRepoDisposablePumpStatus._accumVolMl.Value", result);
             msgResult.mResponseStr = result.toStdString();
+            qDebug() << "Result from cmd ECCirc_Pump: " << result;
             svoutput.push_back(msgResult);
             break;
 

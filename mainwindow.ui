@@ -134,8 +134,8 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>150</y>
+      <x>620</x>
+      <y>180</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -147,8 +147,8 @@
    <widget class="QLineEdit" name="lineEditQfConnStatus">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>120</y>
+      <x>620</x>
+      <y>150</y>
       <width>131</width>
       <height>25</height>
      </rect>
@@ -167,14 +167,14 @@
      </rect>
     </property>
     <property name="text">
-     <string>10.183.169.70</string>
+     <string>10.183.176.247</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>120</y>
+      <y>110</y>
       <width>101</width>
       <height>17</height>
      </rect>
@@ -225,7 +225,7 @@
    <widget class="QPushButton" name="pushButtonConnToSelQf">
     <property name="geometry">
      <rect>
-      <x>600</x>
+      <x>620</x>
       <y>80</y>
       <width>131</width>
       <height>25</height>
@@ -272,6 +272,32 @@
     </property>
     <property name="text">
      <string>Location of Python Scripts</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEditQfSystemTime">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>150</y>
+      <width>131</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>180</y>
+      <width>101</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>QF System Time</string>
     </property>
    </widget>
   </widget>

@@ -36,7 +36,10 @@ driver.get(ipStr) # e.g. http://10.183.169.70/deo.html
 assert "UI Test App" in driver.title
 
 
-#wow, takes at least 2, sometimes 3 sec for page to respond...ugh..
+# It can take up 3 sec for page to respond.
+# implicitly_wait method sets a sticky timeout to implicitly wait for an 
+# element to be found, or a command to complete. This method only needs to be
+# called one time per session.
 driver.implicitly_wait(3.0)
 
 # The Python Selenium script will print this string at startup
@@ -56,9 +59,11 @@ while inputStr != "quit" :
         break; 
     else:
         # e.g. "ECCirc_PumpCapRepoDisposablePumpStatus._accumVolMl.Value"
-        mlDisplay = driver.find_element(by=By.ID, value = inputStr)
-
-        print(mlDisplay.text);
-        
+        try:
+            mlDisplay = driver.find_element(by=By.ID, value = inputStr)
+            print(mlDisplay.text);
+        except: 
+            print("Can't find element")
+                
 driver.close()  # supposedly quit works too?
 print("done")
