@@ -36,7 +36,11 @@ bool PythonProcess::spawnProcess(QStringList pyScriptNameAndParams) {
 
     bool started = false;
 
-    mProcess.start("python3", pyScriptNameAndParams);
+    // QProcess apparently isn't the most robust when things don't go as planned.
+    // It would appear we'll have to use a pointer, and discard the old process ptr
+    // if it can't open a web page
+    mProcessPtr = std::make_shared<QProcess>();
+    mProcessPtr->start("python3", pyScriptNameAndParams);
 
     // The problem is, python3 spins up just fine regardless of finding the script
     // you need the script to emit a message, and look for the message for confirmation
@@ -44,11 +48,15 @@ bool PythonProcess::spawnProcess(QStringList pyScriptNameAndParams) {
 
     // do we seriously wait up to four sec for the message?  It takes about that long
     // for the webpage to spin up!!!
-    mProcess.waitForReadyRead(4000);  // mS or -1 to wait indf.
-    QString msgOutStr = mProcess.readAll();
+    mProcessPtr->waitForReadyRead(4000);  // mS or -1 to wait indf.
+    QString msgOutStr = mProcessPtr->readAll();
 
     if (msgOutStr.contains(SeleniumQFInterfaceReadyString)) {
         started = true;
+    }
+    else {
+        // chances are the wrong ip addr was used, or the QF is offline
+        //mProcessPtr->kill();
     }
 
     return started;
@@ -57,24 +65,28 @@ bool PythonProcess::spawnProcess(QStringList pyScriptNameAndParams) {
 void PythonProcess::sendToProcess(QString msgInStr, QString& msgOutStr) {
 
     // first call starting, 2nd call running
-    QProcess::ProcessState state = mProcess.state();
-    if(mProcess.state() != QProcess::NotRunning) {
+    if (mProcessPtr != nullptr) {
 
-        // The msg to the python process needs a "\n" to act as a cr/lf (enter key press)
-        msgInStr += "\n";
+        QProcess::ProcessState state = mProcessPtr->state();
 
-        mProcess.write(msgInStr.toUtf8());
+        if(state != QProcess::NotRunning) {
 
-        // todo - !!! Critical! Must be longer than QFseleniumInterface.py timeout, or
-        // it returns "" while py script is still waiting for response!!!
-        mProcess.waitForReadyRead(5000);  // mS or -1 to wait indf.
-        msgOutStr = mProcess.readAll();
+            // The msg to the python process needs a "\n" to act as a cr/lf (enter key press)
+            msgInStr += "\n";
 
-        QString stderr = mProcess.readAllStandardError(); // todo - what about this?
-    }
-    else {
-        qDebug() << "Python process not running!!!";
-        msgOutStr = "";
+            mProcessPtr->write(msgInStr.toUtf8());
+
+            // todo - !!! Critical! Must be longer than QFseleniumInterface.py timeout, or
+            // it returns "" while py script is still waiting for response!!!
+            mProcessPtr->waitForReadyRead(5000);  // mS or -1 to wait indf.
+            msgOutStr = mProcessPtr->readAll();
+
+            QString stderr = mProcessPtr->readAllStandardError(); // todo - what about this?
+        }
+        else {
+            qDebug() << "Python process not running!!!";
+            msgOutStr = "";
+        }
     }
 
 }

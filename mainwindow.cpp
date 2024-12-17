@@ -77,7 +77,7 @@ void MainWindow::mQueryResponseTimerSlot() {
 //          processes them.
 //
 void MainWindow::mProcessPeriodicOPC() {
-    if (mOpcThreadPtr->pullDataReady()) {
+    while (mOpcThreadPtr->pullDataReady()) {
 
         std::vector<FLEX2message> msgs;
 
@@ -122,14 +122,12 @@ void MainWindow::mProcessPeriodicOPC() {
 //          processes them.
 //
 void MainWindow::mProcessPeriodicQF() {
+
     // This timer driven fcn looks for msgs from QF processor thread
-    while (mQFThreadPtr->pullDataReady()) {  // this WAS "if"
+    while (mQFThreadPtr->pullDataReady()) {
+
         std::vector<QFmessage> msgs;
-
-        // Todo - what is there are more than one msg vectors queued?
         mQFThreadPtr->pullProcessedData(msgs);
-
-        qDebug() << "mQFThreadPtr.pullProcessedData";
 
         for (QFmessage& s : msgs) {
             if (s.mCommand == QFmessage::Command::GetECCirc_PumpCapRepoDisposablePumpStatus_accumVolMl) {
@@ -220,8 +218,8 @@ void MainWindow::on_pushButtonConnToSelQf_clicked()
     // If the python interface was running when it lost its connection
     // make sure the process is stopped before restarting it and the web
     // page
-    msg.mCommand = QFmessage::Command::Quit;
-    msgs.push_back(msg);
+//    msg.mCommand = QFmessage::Command::Quit;
+//    msgs.push_back(msg);
 
 
     msg.mCommand = QFmessage::Command::ConnectToSelenium;

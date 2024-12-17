@@ -1,8 +1,10 @@
 #ifndef PYTHONPROCESS_H
 #define PYTHONPROCESS_H
 
+#include "memory"
 #include "QProcess"
 #include "QString"
+
 
 class PythonProcess
 {
@@ -11,7 +13,7 @@ public:
     ~PythonProcess();
 
 
-    QProcess mProcess;
+    std::shared_ptr<QProcess> mProcessPtr;
 
     bool spawnProcess(QStringList pyScriptNameAndParams);
     void sendToProcess(QString msgInStr, QString &msgOutStr);
