@@ -29,7 +29,8 @@ private:
 
     // Critical! Must be longer than QFseleniumInterface.py timeout, or
     // it returns "" while py script is still waiting for response!!!
-    const int PROCESS_WAIT_READY_READ_TIMEOUT = 5000;
+    const int PROCESS_WAIT_READY_READ_TIMEOUT_MS = 5000;
+
 };
 
 class PythonOneShot

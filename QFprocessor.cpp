@@ -69,14 +69,12 @@ void QFprocessor::process(std::vector<QFmessage> &svinput, std::vector<QFmessage
         case QFmessage::Command::GetSystemTime:
             mPythonSeleniumProcessPtr->sendToProcess("systemTime", result);
             msgResult.mResponseStr = result.toStdString();
-            qDebug() << "Result from cmd systemTime: " << result;
             svoutput.push_back(msgResult);
             break;
 
 
-        // todo - warning - this field went away in DEO, and the py script barfed when it
-        // coudln't find it!  Furthermore, this app barfed when it couldn't talk to the py
-        // script!
+        // Warning - this field is not always available in DEO, it might be dependent upon
+        // the operating mode (idle vs process)
         case QFmessage::Command::GetECCirc_PumpCapRepoDisposablePumpStatus_accumVolMl:
             mPythonSeleniumProcessPtr->sendToProcess("ECCirc_PumpCapRepoDisposablePumpStatus._accumVolMl.Value", result);
             msgResult.mResponseStr = result.toStdString();

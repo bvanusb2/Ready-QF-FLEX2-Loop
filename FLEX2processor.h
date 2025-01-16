@@ -3,6 +3,8 @@
 #include "ThreadContainer.h"
 #include "pythonprocess.h"
 
+#include "debugvaluesgenerator.h"
+
 class FLEX2message {
 public:
     enum Command {
@@ -18,7 +20,8 @@ public:
     // to get that crazy.  Plus I'm not sure if I like std::any.  I hate
     // ambiguous code
     std::string mResponseStr;
-    double mResponseDouble;
+    double mResultDouble;
+    double mResultDate; // e.g. QDateTime
 
     FLEX2message() {
         mCommand = None;
@@ -43,6 +46,14 @@ private:
     PythonOneShot mPythonOneShot;
 
     QString mPythonScriptFolderName;
+
+    // todo Consider removing after test
+    bool mDebugFakeFlexResponse = true;
+
+    // for debugging
+    DebugValuesGenerator debugValuesGenerator_pH;
+    DebugValuesGenerator debugValuesGenerator_lacticAcid;
+
 };
 
 #endif // FLEX2PROCESSOR_H

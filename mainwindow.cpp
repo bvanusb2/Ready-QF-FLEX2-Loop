@@ -1,5 +1,6 @@
 
 #include <string>
+#include <charconv>  // std::from_chars
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -20,6 +21,11 @@ MainWindow::MainWindow(QWidget *parent)
     mQueryResponseTimer = new QTimer(this);
     connect(mQueryResponseTimer, &QTimer::timeout, this, &MainWindow::mQueryResponseTimerSlot);
 
+
+    // For debugging purposes, this will run perhaps at a one minute rate.
+    // For actual work, probably will run once an hour / half-hour?  We do want to display
+    // the flex results right after running.  So, maybe query for new results every minute,
+    // and if new results are ready, then request them asap
     mQueryResponseTimer->start(mQueryResponseTimerInterval);
 
     // The OPC thread takes requests from the GUI (or a timer) and invokes
@@ -34,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent)
         mQFThreadPtr = std::make_unique<QFprocessor>(ui->lineEditAddrPythonScriptsFolder->text());
         mQFThreadPtr->startThread();
     }
+
+    // the last param is max num points in plot.  Keep at 30, which is 5 days at 6 samples per day
+    lactosePlot.setPlot(ui->widgetPlotLacticAcid, QColorConstants::Blue, "Lactic Acid, mg/mL", 1.2, 30);
 
 }
 
@@ -62,9 +71,16 @@ MainWindow::~MainWindow()
 //
 void MainWindow::mQueryResponseTimerSlot() {
 
-    mProcessPeriodicOPC();
+    // update display on connection status (up/down)
+    // If still up, send a query to Flex 2 for any new data, and to QF for any updates
 
-    mProcessPeriodicQF();
+
+    // Process any data received from Flex2 and QF
+    // How to do this?  Update fields and graph
+    mProcessFlex2Messages();
+    mProcessQfMessages();
+
+    // save front panel to png, so http requests get latest display
 
 }
 
@@ -76,7 +92,7 @@ void MainWindow::mQueryResponseTimerSlot() {
 // Purpose: Timer driven, polls the OPC thread for any new messages, and if so,
 //          processes them.
 //
-void MainWindow::mProcessPeriodicOPC() {
+void MainWindow::mProcessFlex2Messages() {
     while (mOpcThreadPtr->pullDataReady()) {
 
         std::vector<FLEX2message> msgs;
@@ -85,28 +101,28 @@ void MainWindow::mProcessPeriodicOPC() {
 
         qDebug() << "opcThread.pullProcessedData";
 
-        // TODO - Assuming that we're getting a string of format "analyte: value"
-        // and we're doing the processing of that string here.  We could instead
-        // process in OPCthread::pythonRequest and return just the "value" string
-        // I don't think we want to convert to int/double because the processor does not
-        // parse by value, and here we might receive a conc OR a status string...
-
         // The FLEX2 processor needs to know about the format, not this thread. Fix.
         for (FLEX2message& s : msgs) {
 
             if (s.mCommand == FLEX2message::Command::GetLacticAcidConc) {
                 std::string resp = s.mResponseStr;
-                std::string conc = resp.substr(resp.find(":") + 1);
-                ui->lineEditLacticAcidConc->setText(QString::fromStdString(conc));
 
-                qDebug() << "found lactic acid response, conc: " << QString::fromStdString(conc);
+                double val = s.mResultDouble;
+                double date = s.mResultDate;  // for plotting
+                ui->lineEditLacticAcidConc->setText(QString::fromStdString(std::to_string(val)));
+
+                // we'll need a control object to hold these date & values...and pass to plot
+                lactosePlot.addDataPoint(date, val);
+                qDebug() << "found lactic acid response, conc: " << val;
             }
             else if (s.mCommand == FLEX2message::Command::GetpH) {
                 std::string resp = s.mResponseStr;
-                std::string conc = resp.substr(resp.find(":") + 1);
-                ui->lineEditPh->setText(QString::fromStdString(conc));
 
-                qDebug() << "found pH response, conc: " << QString::fromStdString(conc);
+                double val = s.mResultDouble;
+                double date = s.mResultDate;  // for plotting
+                ui->lineEditPh->setText(QString::fromStdString(std::to_string(val)));
+
+                qDebug() << "found pH response, conc: " << val;
             }
 
         }
@@ -121,7 +137,7 @@ void MainWindow::mProcessPeriodicOPC() {
 // Purpose: Timer driven, polls the OPC thread for any new messages, and if so,
 //          processes them.
 //
-void MainWindow::mProcessPeriodicQF() {
+void MainWindow::mProcessQfMessages() {
 
     // This timer driven fcn looks for msgs from QF processor thread
     while (mQFThreadPtr->pullDataReady()) {
@@ -188,6 +204,7 @@ void MainWindow::disconnectedFromQF() {
     ui->lineEditQfConnStatus->setPalette(palette);
 }
 
+
 void MainWindow::on_pushButtonGetLacticAcidFlex_clicked()
 {
     FLEX2message msg;
@@ -215,13 +232,6 @@ void MainWindow::on_pushButtonConnToSelQf_clicked()
     QFmessage msg;
     std::vector<QFmessage> msgs;
 
-    // If the python interface was running when it lost its connection
-    // make sure the process is stopped before restarting it and the web
-    // page
-//    msg.mCommand = QFmessage::Command::Quit;
-//    msgs.push_back(msg);
-
-
     msg.mCommand = QFmessage::Command::ConnectToSelenium;
 
     // todo - move name to QFprocessor class as static const defn.
@@ -244,6 +254,14 @@ void MainWindow::on_pushButtonQueryQFflow_clicked()
     msgs.push_back(msg);
     mQFThreadPtr->pushSampleData(msgs);
 
-    // You'll need to query later for the response!
+}
+
+
+void MainWindow::on_pushButtonSaveWidgetAsImage_clicked()
+{
+    // https://forum.qt.io/topic/56727/saving-widget-in-image/3
+    ui->centralwidget->grab().save("widget.png");
+
+    //ui->widget->grab().save("image.png");
 }
 

@@ -1,6 +1,6 @@
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++17
 
@@ -11,16 +11,22 @@ CONFIG += c++17
 SOURCES += \
     FLEX2processor.cpp \
     QFprocessor.cpp \
+    chemplot.cpp \
+    debugvaluesgenerator.cpp \
     main.cpp \
     mainwindow.cpp \
-    pythonprocess.cpp
+    pythonprocess.cpp \
+    qcustomplot.cpp
 
 HEADERS += \
     FLEX2processor.h \
     QFprocessor.h \
     ThreadContainer.h \
+    chemplot.h \
+    debugvaluesgenerator.h \
     mainwindow.h \
-    pythonprocess.h
+    pythonprocess.h \
+    qcustomplot.h
 
 FORMS += \
     mainwindow.ui

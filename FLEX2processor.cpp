@@ -6,7 +6,12 @@
 
 FLEX2processor::FLEX2processor(QString folder, QThread *parent) :
     ThreadContainer{parent}
-  , mPythonScriptFolderName(folder) {
+  , mPythonScriptFolderName(folder)
+  , debugValuesGenerator_pH{DebugValuesGenerator::DebugValuesGeneratorType::pH}
+  , debugValuesGenerator_lacticAcid{DebugValuesGenerator::DebugValuesGeneratorType::LacticAcid}
+{
+
+
 }
 
 FLEX2processor::~FLEX2processor() {
@@ -63,14 +68,39 @@ void FLEX2processor::process(std::vector<FLEX2message> &svinput, std::vector<FLE
 
 }
 
+//
+// Function name: procPythonInOut
+//
+// Purpose: Takes a Flex2 OPC request string and pushes it to the python OPC
+//          script processor.  This process requests data via OPC from the Flex2
+//          and populates the message out struct with the data.
+//
+//          The script is a blocking process so this function is called by a
+//          non-gui thread.
+//
 void FLEX2processor::procPythonInOut(QStringList& arg, FLEX2message& msgIn, FLEX2message& msgOut, QString p_stderr) {
 
     std::string msgOutStr;
 
-    mPythonOneShot.request(arg, msgOutStr, p_stderr);
-
+    // Return the response to the caller
     msgOut = msgIn;
-    msgOut.mResponseStr = msgOutStr;
+    msgOut.mResponseStr = msgOutStr;  // todo - deprecate?
+
+    // Send OPC command to OPC server, wait for response
+    // The string list is a list of words for the command line request
+    if (mDebugFakeFlexResponse) {
+
+        // TODO - You need to parse on pH, lactic acid or glucose!
+        double value;
+        double date;
+        debugValuesGenerator_lacticAcid.getValueAndDate(value, date);
+        msgOut.mResultDouble = value;
+        msgOut.mResultDate = date;
+
+    } else {
+        mPythonOneShot.request(arg, msgOutStr, p_stderr);
+    }
+
 
 }
 

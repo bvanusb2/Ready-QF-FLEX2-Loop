@@ -14,21 +14,7 @@ PythonProcess::PythonProcess()
 }
 
 PythonProcess::~PythonProcess() {
-    //terminate();
 }
-
-//void PythonProcess::terminate() {
-
-//    // todo - as shutting down this process, the system is issuing these warnings...
-//    // QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
-//    terminateProcessRequest();
-
-//    // do we need to wait for sleep to finish?  Should we get rid of sleep in py script?
-//    if (mProcess.processId() != 0) {
-//        mProcess.terminate();
-//    }
-//}
-
 
 // QStringList must include pythonScriptName.py, and any parameters expected
 // at script startup
@@ -37,26 +23,18 @@ bool PythonProcess::spawnProcess(QStringList pyScriptNameAndParams) {
     bool started = false;
 
     // QProcess apparently isn't the most robust when things don't go as planned.
-    // It would appear we'll have to use a pointer, and discard the old process ptr
-    // if it can't open a web page
+    // It would appear that "kill" and "terminate" don't work well with our app.
+    // Better to use a pointer, and discard when a web page can't spin up.
+    // If the page doesn't spin up, it will eventually close on it's own
+    // so don't try to kill/terminate
     mProcessPtr = std::make_shared<QProcess>();
     mProcessPtr->start("python3", pyScriptNameAndParams);
 
-    // The problem is, python3 spins up just fine regardless of finding the script
-    // you need the script to emit a message, and look for the message for confirmation
-    // that it's running
-
-    // do we seriously wait up to four sec for the message?  It takes about that long
-    // for the webpage to spin up!!!
-    mProcessPtr->waitForReadyRead(4000);  // mS or -1 to wait indf.
+    mProcessPtr->waitForReadyRead(PROCESS_WAIT_READY_READ_TIMEOUT_MS);
     QString msgOutStr = mProcessPtr->readAll();
 
     if (msgOutStr.contains(SeleniumQFInterfaceReadyString)) {
         started = true;
-    }
-    else {
-        // chances are the wrong ip addr was used, or the QF is offline
-        //mProcessPtr->kill();
     }
 
     return started;
@@ -76,9 +54,9 @@ void PythonProcess::sendToProcess(QString msgInStr, QString& msgOutStr) {
 
             mProcessPtr->write(msgInStr.toUtf8());
 
-            // todo - !!! Critical! Must be longer than QFseleniumInterface.py timeout, or
+            // Critical! Must be longer than QFseleniumInterface.py timeout, or
             // it returns "" while py script is still waiting for response!!!
-            mProcessPtr->waitForReadyRead(5000);  // mS or -1 to wait indf.
+            mProcessPtr->waitForReadyRead(PROCESS_WAIT_READY_READ_TIMEOUT_MS);
             msgOutStr = mProcessPtr->readAll();
 
             QString stderr = mProcessPtr->readAllStandardError(); // todo - what about this?

@@ -6,6 +6,7 @@
 
 #include "FLEX2processor.h"
 #include "QFprocessor.h"
+#include "chemplot.h"
 
 // for "can't find element" string
 #include "pythonprocess.h"
@@ -25,8 +26,8 @@ public:
 private slots:
 
     void mQueryResponseTimerSlot();
-    void mProcessPeriodicQF();
-    void mProcessPeriodicOPC();
+    void mProcessQfMessages();
+    void mProcessFlex2Messages();
     void on_pushButtonGetLacticAcidFlex_clicked();
 
     void on_pushButtonGetPhFlex_clicked();
@@ -34,6 +35,8 @@ private slots:
     void on_pushButtonConnToSelQf_clicked();
 
     void on_pushButtonQueryQFflow_clicked();
+
+    void on_pushButtonSaveWidgetAsImage_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -50,6 +53,10 @@ private:
     int mQueryResponseTimerInterval = 1000; // mS
     bool mConnectedQF = false;
     std::string mPrevQFsystemTime;
+
+    // Plots!!!
+    ChemPlot lactosePlot;
+
 
 };
 #endif // MAINWINDOW_H
