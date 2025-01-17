@@ -8,7 +8,7 @@ class ChemPlot
 public:
     ChemPlot();
     void addDataPoint(double timePt, double dataPt);
-    void setPlot(QCustomPlot *_plotWidget, QColor color, QString analyteLabel, double maxAnalyteVal, size_t numDatapointsInPlot);
+    void setPlot(QCustomPlot *_plotWidget, QColor color, QString analyteLabel, double maxAnalyteVal, double yTicker, size_t numDatapointsInPlot);
     void setAnalyteLabel(QString label) {
         mAnalyteLabel = label;
     }

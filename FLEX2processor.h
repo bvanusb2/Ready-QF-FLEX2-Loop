@@ -16,9 +16,6 @@ public:
 
     Command mCommand;
 
-    // todo - was considering std::any but I don't know if I want
-    // to get that crazy.  Plus I'm not sure if I like std::any.  I hate
-    // ambiguous code
     std::string mResponseStr;
     double mResultDouble;
     double mResultDate; // e.g. QDateTime

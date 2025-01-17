@@ -31,19 +31,19 @@ MainWindow::MainWindow(QWidget *parent)
     // The OPC thread takes requests from the GUI (or a timer) and invokes
     // synchonous Python scripts system calls.  It pushes the responses into a queue
     // which can later be pulled from.
-    if (mOpcThreadPtr == nullptr) {
-        mOpcThreadPtr = std::make_unique<FLEX2processor>(ui->lineEditAddrPythonScriptsFolder->text());
-        mOpcThreadPtr->startThread();
+    if (mFlex2processorPtr == nullptr) {
+        mFlex2processorPtr = std::make_unique<FLEX2processor>(ui->lineEditAddrPythonScriptsFolder->text());
+        mFlex2processorPtr->startThread();
     }
 
-    if (mQFThreadPtr == nullptr) {
-        mQFThreadPtr = std::make_unique<QFprocessor>(ui->lineEditAddrPythonScriptsFolder->text());
-        mQFThreadPtr->startThread();
+    if (mQFprocessorPtr == nullptr) {
+        mQFprocessorPtr = std::make_unique<QFprocessor>(ui->lineEditAddrPythonScriptsFolder->text());
+        mQFprocessorPtr->startThread();
     }
 
     // the last param is max num points in plot.  Keep at 30, which is 5 days at 6 samples per day
-    lactosePlot.setPlot(ui->widgetPlotLacticAcid, QColorConstants::Blue, "Lactic Acid, mg/mL", 1.2, 30);
-
+    lactosePlot.setPlot(ui->widgetPlotLacticAcid, QColorConstants::Blue, "Lactic Acid, mg/mL", 1.2, 0.2, 30);
+    pHPlot.setPlot(ui->widgetPlotPhAcid, QColorConstants::Green, "pH", 14, 2, 30);
 }
 
 MainWindow::~MainWindow()
@@ -51,12 +51,12 @@ MainWindow::~MainWindow()
     // Send a message to the QF processor thread to instruct the python script
     // to close the DEO window and terminate
     // todo - still getting a QMutes: destroying locked mutex msg
-    mQFThreadPtr->sendQuitMsgToPySel();
+    mQFprocessorPtr->sendQuitMsgToPySel();
 
     // Allow enough time for script to close DEO and clean up
     QThread::sleep(2);
 
-    mOpcThreadPtr->terminateProc();
+    mFlex2processorPtr->terminateProc();
 
     delete ui;
     delete mQueryResponseTimer;
@@ -74,30 +74,26 @@ void MainWindow::mQueryResponseTimerSlot() {
     // update display on connection status (up/down)
     // If still up, send a query to Flex 2 for any new data, and to QF for any updates
 
-
     // Process any data received from Flex2 and QF
     // How to do this?  Update fields and graph
     mProcessFlex2Messages();
     mProcessQfMessages();
 
-    // save front panel to png, so http requests get latest display
-
 }
 
 
-// todo - consider renaming mProcessPeriodicFlex2
 //
-// Function name: mProcessPeriodicOpc
+// Function name: mProcessFlex2Messages
 //
 // Purpose: Timer driven, polls the OPC thread for any new messages, and if so,
 //          processes them.
 //
 void MainWindow::mProcessFlex2Messages() {
-    while (mOpcThreadPtr->pullDataReady()) {
+    while (mFlex2processorPtr->pullDataReady()) {
 
         std::vector<FLEX2message> msgs;
 
-        mOpcThreadPtr->pullProcessedData(msgs);
+        mFlex2processorPtr->pullProcessedData(msgs);
 
         qDebug() << "opcThread.pullProcessedData";
 
@@ -111,7 +107,7 @@ void MainWindow::mProcessFlex2Messages() {
                 double date = s.mResultDate;  // for plotting
                 ui->lineEditLacticAcidConc->setText(QString::fromStdString(std::to_string(val)));
 
-                // we'll need a control object to hold these date & values...and pass to plot
+                // we'll need a control object to hold these date & values
                 lactosePlot.addDataPoint(date, val);
                 qDebug() << "found lactic acid response, conc: " << val;
             }
@@ -121,7 +117,7 @@ void MainWindow::mProcessFlex2Messages() {
                 double val = s.mResultDouble;
                 double date = s.mResultDate;  // for plotting
                 ui->lineEditPh->setText(QString::fromStdString(std::to_string(val)));
-
+                pHPlot.addDataPoint(date, val);
                 qDebug() << "found pH response, conc: " << val;
             }
 
@@ -140,10 +136,10 @@ void MainWindow::mProcessFlex2Messages() {
 void MainWindow::mProcessQfMessages() {
 
     // This timer driven fcn looks for msgs from QF processor thread
-    while (mQFThreadPtr->pullDataReady()) {
+    while (mQFprocessorPtr->pullDataReady()) {
 
         std::vector<QFmessage> msgs;
-        mQFThreadPtr->pullProcessedData(msgs);
+        mQFprocessorPtr->pullProcessedData(msgs);
 
         for (QFmessage& s : msgs) {
             if (s.mCommand == QFmessage::Command::GetECCirc_PumpCapRepoDisposablePumpStatus_accumVolMl) {
@@ -181,7 +177,7 @@ void MainWindow::mProcessQfMessages() {
         std::vector<QFmessage> msgs;
         msg.mCommand = QFmessage::Command::GetSystemTime;
         msgs.push_back(msg);
-        mQFThreadPtr->pushSampleData(msgs);
+        mQFprocessorPtr->pushSampleData(msgs);
     }
 
 }
@@ -212,7 +208,7 @@ void MainWindow::on_pushButtonGetLacticAcidFlex_clicked()
 
     msg.mCommand = FLEX2message::Command::GetLacticAcidConc;
     msgs.push_back(msg);
-    mOpcThreadPtr->pushSampleData(msgs);
+    mFlex2processorPtr->pushSampleData(msgs);
 }
 
 void MainWindow::on_pushButtonGetPhFlex_clicked()
@@ -222,7 +218,7 @@ void MainWindow::on_pushButtonGetPhFlex_clicked()
 
     msg.mCommand = FLEX2message::Command::GetpH;
     msgs.push_back(msg);
-    mOpcThreadPtr->pushSampleData(msgs);
+    mFlex2processorPtr->pushSampleData(msgs);
 
 }
 
@@ -242,7 +238,7 @@ void MainWindow::on_pushButtonConnToSelQf_clicked()
     msg.mCommandStringList.push_back(ipAddr);
     msgs.push_back(msg);
 
-    mQFThreadPtr->pushSampleData(msgs);
+    mQFprocessorPtr->pushSampleData(msgs);
 }
 
 
@@ -252,7 +248,7 @@ void MainWindow::on_pushButtonQueryQFflow_clicked()
     std::vector<QFmessage> msgs;
     msg.mCommand = QFmessage::Command::GetECCirc_PumpCapRepoDisposablePumpStatus_accumVolMl;
     msgs.push_back(msg);
-    mQFThreadPtr->pushSampleData(msgs);
+    mQFprocessorPtr->pushSampleData(msgs);
 
 }
 

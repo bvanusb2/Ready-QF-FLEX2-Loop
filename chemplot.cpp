@@ -15,6 +15,7 @@ void ChemPlot::setPlot(
         QColor color,
         QString analyteLabel,
         double maxAnalyteVal = 1.0,
+        double yTicker = 1.0,
         size_t numDatapointsInPlot = mDefaultNumDatapointsInPlot)
 {
     mPlotWidget = _plotWidget;
@@ -69,7 +70,7 @@ void ChemPlot::setPlot(
 
     //QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
     QSharedPointer<QCPAxisTickerFixed> fixedTicker(new QCPAxisTickerFixed);
-    fixedTicker->setTickStep(0.2);
+    fixedTicker->setTickStep(yTicker);
     mPlotWidget->yAxis->setTicker(fixedTicker); // was textTicker
 
     // Y-axis - analyte description

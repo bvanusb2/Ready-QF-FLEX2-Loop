@@ -9,7 +9,7 @@
 #include "chemplot.h"
 
 // for "can't find element" string
-#include "pythonprocess.h"
+// #include "pythonprocess.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -41,8 +41,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    std::unique_ptr<FLEX2processor> mOpcThreadPtr = nullptr;
-    std::unique_ptr<QFprocessor> mQFThreadPtr = nullptr;
+    std::unique_ptr<FLEX2processor> mFlex2processorPtr = nullptr;
+    std::unique_ptr<QFprocessor> mQFprocessorPtr = nullptr;
 
     void connectedToQF();
     void disconnectedFromQF();
@@ -50,12 +50,13 @@ private:
     // For now, just using a simple timer to check for responses.
     // Might add another timer to periodically query FLEX2 and Quautum devices
     QTimer * mQueryResponseTimer;
-    int mQueryResponseTimerInterval = 1000; // mS
+    int mQueryResponseTimerInterval = 100; // mS
     bool mConnectedQF = false;
     std::string mPrevQFsystemTime;
 
     // Plots!!!
     ChemPlot lactosePlot;
+    ChemPlot pHPlot;
 
 
 };

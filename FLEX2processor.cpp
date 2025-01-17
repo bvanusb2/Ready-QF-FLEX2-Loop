@@ -7,8 +7,8 @@
 FLEX2processor::FLEX2processor(QString folder, QThread *parent) :
     ThreadContainer{parent}
   , mPythonScriptFolderName(folder)
-  , debugValuesGenerator_pH{DebugValuesGenerator::DebugValuesGeneratorType::pH}
-  , debugValuesGenerator_lacticAcid{DebugValuesGenerator::DebugValuesGeneratorType::LacticAcid}
+  , debugValuesGenerator_pH{7.0, 1.0}
+  , debugValuesGenerator_lacticAcid{0.5, 0.2}
 {
 
 
@@ -86,14 +86,20 @@ void FLEX2processor::procPythonInOut(QStringList& arg, FLEX2message& msgIn, FLEX
     msgOut = msgIn;
     msgOut.mResponseStr = msgOutStr;  // todo - deprecate?
 
+    double value = 0;
+    double date = 0;
+
     // Send OPC command to OPC server, wait for response
     // The string list is a list of words for the command line request
     if (mDebugFakeFlexResponse) {
 
         // TODO - You need to parse on pH, lactic acid or glucose!
-        double value;
-        double date;
-        debugValuesGenerator_lacticAcid.getValueAndDate(value, date);
+        if (msgIn.mCommand == FLEX2message::GetLacticAcidConc) {
+            debugValuesGenerator_lacticAcid.getValueAndDate(value, date);
+        }
+        else if (msgIn.mCommand == FLEX2message::GetpH) {
+            debugValuesGenerator_pH.getValueAndDate(value, date);
+        }
         msgOut.mResultDouble = value;
         msgOut.mResultDate = date;
 
